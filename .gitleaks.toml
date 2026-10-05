@@ -1,0 +1,27 @@
+title = "jigoku secret scanning"
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "arr-api-key"
+description = "Sonarr/Radarr/Prowlarr 32-char hex API key"
+regex = '''(?i)(api[_-]?key)["'\s:=]{1,10}([a-f0-9]{32})'''
+tags = ["apikey", "arr"]
+
+[[rules]]
+id = "tailscale-authkey"
+description = "Tailscale auth key"
+regex = '''tskey-[a-zA-Z0-9-]{10,}'''
+tags = ["tailscale"]
+
+[[rules]]
+id = "backblaze-app-key"
+description = "Backblaze B2 application key"
+regex = '''(?i)(b2[_-]?app[_-]?key|applicationKey)["'\s:=]{1,10}[A-Za-z0-9]{25,}'''
+tags = ["b2"]
+
+[allowlist]
+description = "Example files are safe"
+paths = ['''\.env\.example$''', '''\.sops\.yaml$''',  '''compose/wger/docker-compose\.override\.example\.yml''',
+  '''compose/wger/dev-postgres/.*''',]

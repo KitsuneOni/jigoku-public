@@ -1,0 +1,39 @@
+services:
+  tdarr:
+    image: ghcr.io/haveagitgat/tdarr:2.29.01
+    container_name: tdarr
+    restart: unless-stopped
+    environment:
+      - TZ=${TZ}
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - UMASK_SET=002
+      - serverIP=0.0.0.0
+      - serverPort=8266
+      - webUIPort=8265
+      - internalNode=true
+      - inContainer=true
+      - ffmpegVersion=7
+      - nodeName=jigoku
+      - NVIDIA_DRIVER_CAPABILITIES=all
+      - NVIDIA_VISIBLE_DEVICES=all
+    volumes:
+      - /opt/appdata/tdarr/server:/app/server
+      - /opt/appdata/tdarr/configs:/app/configs
+      - /opt/appdata/tdarr/logs:/app/logs
+      - /data/media:/media
+      - /data/transcode:/temp
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [ gpu ]
+    networks: [ media, proxy ]
+
+networks:
+  media:
+    external: true
+  proxy:
+    external: true

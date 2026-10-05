@@ -1,0 +1,161 @@
+- Clocks:
+    - World:
+        widget:
+          type: iframe
+          src: /clocks/index.html
+          classes: h-40
+          referrerPolicy: same-origin
+- Calendar:
+    - Agenda:
+        widget:
+          type: calendar
+          view: monthly
+          maxEvents: 10
+          showTime: true
+          integrations:
+            - type: ical
+              url: http://homepage:3000/calendars/uni.ics
+              name: Uni
+              color: purple
+            - type: ical
+              url: http://homepage:3000/calendars/assignments.ics
+              name: Assignments
+              color: red
+            - type: ical
+              url: http://homepage:3000/calendars/personal.ics
+              name: Personal
+              color: blue
+    - Upcoming:
+        widget:
+          type: calendar
+          view: agenda
+          maxEvents: 6
+          showTime: true
+          previousDays: 3
+          integrations:
+            - type: ical
+              url: http://homepage:3000/calendars/uni.ics
+              name: Uni
+              color: purple
+            - type: ical
+              url: http://homepage:3000/calendars/assignments.ics
+              name: Assignments
+              color: red
+            - type: ical
+              url: http://homepage:3000/calendars/personal.ics
+              name: Personal
+              color: blue
+- Media:
+    - Jellyfin:
+        href: https://jellyfin.{{HOMEPAGE_VAR_DOMAIN}}
+        icon: jellyfin.png
+        description: Movies, TV, music
+        widget:
+          type: jellyfin
+          url: http://jellyfin:8096
+          key: "{{HOMEPAGE_VAR_JELLYFIN_KEY}}"
+          enableBlocks: true
+          enableNowPlaying: true
+
+    - Jellyseerr:
+        href: https://requests.{{HOMEPAGE_VAR_DOMAIN}}
+        icon: jellyseerr.png
+        description: Request titles
+        widget:
+          type: jellyseerr
+          url: http://jellyseerr:5055
+          key: "{{HOMEPAGE_VAR_JELLYSEERR_KEY}}"
+
+    - Audiobookshelf:
+        href: https://books.{{HOMEPAGE_VAR_DOMAIN}}
+        icon: audiobookshelf.png
+        description: Audiobooks and podcasts
+
+- Automation:
+    - Radarr:
+        href: https://radarr.{{HOMEPAGE_VAR_DOMAIN}}
+        icon: radarr.png
+        widget:
+          type: radarr
+          url: http://radarr:7878
+          key: "{{HOMEPAGE_VAR_RADARR_KEY}}"
+
+    - Sonarr:
+        href: https://sonarr.{{HOMEPAGE_VAR_DOMAIN}}
+        icon: sonarr.png
+        widget:
+          type: sonarr
+          url: http://sonarr:8989
+          key: "{{HOMEPAGE_VAR_SONARR_KEY}}"
+
+    - Prowlarr:
+        href: https://prowlarr.{{HOMEPAGE_VAR_DOMAIN}}
+        icon: prowlarr.png
+        widget:
+          type: prowlarr
+          url: http://prowlarr:9696
+          key: "{{HOMEPAGE_VAR_PROWLARR_KEY}}"
+
+    - Bazarr:
+        href: https://bazarr.{{HOMEPAGE_VAR_DOMAIN}}
+        icon: bazarr.png
+        widget:
+          type: bazarr
+          url: http://bazarr:6767
+          key: "{{HOMEPAGE_VAR_BAZARR_KEY}}"
+
+- Downloads:
+    - SABnzbd:
+        href: https://sab.{{HOMEPAGE_VAR_DOMAIN}}
+        icon: sabnzbd.png
+        description: Usenet — primary
+        widget:
+          type: sabnzbd
+          url: http://sabnzbd:8080
+          key: "{{HOMEPAGE_VAR_SAB_KEY}}"
+
+    - qBittorrent:
+        href: https://qbit.{{HOMEPAGE_VAR_DOMAIN}}
+        icon: qbittorrent.png
+        description: Torrents — behind VPN
+        widget:
+          type: qbittorrent
+          url: http://gluetun:8080
+          username: "{{HOMEPAGE_VAR_QBIT_USER}}"
+          password: "{{HOMEPAGE_VAR_QBIT_PASS}}"
+
+- Infrastructure:
+    - Dockge:
+        href: https://dockge.{{HOMEPAGE_VAR_DOMAIN}}
+        icon: dockge.png
+        description: Compose stacks
+    - Dozzle:
+        href: https://logs.{{HOMEPAGE_VAR_DOMAIN}}
+        icon: dozzle.png
+        description: Container logs
+    - Scrutiny:
+        href: https://scrutiny.{{HOMEPAGE_VAR_DOMAIN}}
+        icon: scrutiny.png
+        description: Disk health
+    - Beszel:
+        href: https://beszel.{{HOMEPAGE_VAR_DOMAIN}}
+        icon: beszel.png
+        description: Resource monitoring
+
+- enma:
+    - AdGuard Home:
+        href: https://adguard.{{HOMEPAGE_VAR_DOMAIN}}
+        icon: adguard-home.png
+        description: DNS and ad blocking
+    - Uptime Kuma:
+        href: https://uptime.{{HOMEPAGE_VAR_DOMAIN}}
+        icon: uptime-kuma.png
+        description: Service monitoring
+    - ntfy:
+        href: https://ntfy.{{HOMEPAGE_VAR_DOMAIN}}
+        icon: ntfy.png
+        description: Push alerts
+    - Backrest:
+        href: https://backrest.{{HOMEPAGE_VAR_DOMAIN}}
+        icon: restic.png
+        description: Backups

@@ -1,0 +1,16 @@
+[Unit]
+Description=restic backup of jigoku configs
+After=network-online.target docker.service
+Wants=network-online.target
+OnFailure=backup-failed.service
+
+[Service]
+Type=oneshot
+EnvironmentFile=/root/.backup-env
+ExecStart=/usr/local/bin/backup-run.sh
+Environment=HOME=/root
+Environment=RESTIC_CACHE_DIR=/root/.cache/restic
+TimeoutStartSec=3600
+Restart=on-failure
+RestartSec=300
+

@@ -1,0 +1,27 @@
+services:
+  caddy:
+    image: ghcr.io/caddybuilds/caddy-cloudflare:2.8.4
+    container_name: caddy
+    restart: unless-stopped
+    security_opt: [ "no-new-privileges:true" ]
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      - CLOUDFLARE_API_TOKEN=${CLOUDFLARE_API_TOKEN}
+      - DOMAIN=${DOMAIN}
+      - LAN_SUBNET=${LAN_SUBNET}
+      - TS_GUEST_RANGE=${TS_GUEST_RANGE}
+    volumes:
+      - /opt/repo/config/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - /opt/appdata/caddy/data:/data
+      - /opt/appdata/caddy/config:/config
+      - /opt/appdata/wger/static:/srv/wger-static:ro
+    networks: [ proxy ]
+    dns:
+      - 1.1.1.1
+      - 1.0.0.1
+networks:
+  proxy:
+    external: true

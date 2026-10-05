@@ -1,0 +1,14 @@
+- Reference:
+    - TRaSH Guides:
+        - abbr: TG
+          href: https://trash-guides.info/
+    - Jellyfin Docs:
+        - abbr: JF
+          href: https://jellyfin.org/docs/
+    - Tailscale Admin:
+        - abbr: TS
+          href: https://login.tailscale.com/admin
+- Repo:
+    - jigoku on GitHub:
+        - abbr: GH
+          href: https://github.com/KitsuneOni/jigoku-public

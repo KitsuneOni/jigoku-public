@@ -1,0 +1,82 @@
+services:
+  socket-proxy:
+    image: tecnativa/docker-socket-proxy:0.3.0
+    container_name: socket-proxy
+    restart: unless-stopped
+    environment:
+      # Read-only: list containers and nothing else.
+      - CONTAINERS=1
+      - IMAGES=1
+      - INFO=1
+      - POST=0
+      - BUILD=0
+      - COMMIT=0
+      - CONFIGS=0
+      - EXEC=0
+      - VOLUMES=0
+      - NETWORKS=0
+      - SECRETS=0
+      - SERVICES=0
+      - SWARM=0
+      - SYSTEM=0
+      - TASKS=0
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks: [ proxy ]
+
+  homepage:
+    build: ./homepage-build
+    container_name: homepage
+    restart: unless-stopped
+    security_opt: [ "no-new-privileges:true" ]
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - HOMEPAGE_ALLOWED_HOSTS=${HOMEPAGE_ALLOWED_HOSTS}
+      - HOMEPAGE_VAR_JELLYFIN_KEY=${JELLYFIN_KEY}
+      - HOMEPAGE_VAR_RADARR_KEY=${RADARR_KEY}
+      - HOMEPAGE_VAR_SONARR_KEY=${SONARR_KEY}
+      - HOMEPAGE_VAR_PROWLARR_KEY=${PROWLARR_KEY}
+      - HOMEPAGE_VAR_BAZARR_KEY=${BAZARR_KEY}
+      - HOMEPAGE_VAR_SAB_KEY=${SAB_KEY}
+      - HOMEPAGE_VAR_JELLYSEERR_KEY=${JELLYSEERR_KEY}
+      - HOMEPAGE_VAR_QBIT_USER=${QBT_USERNAME}
+      - HOMEPAGE_VAR_QBIT_PASS=${QBT_PASSWORD}
+      - HOMEPAGE_VAR_DOMAIN=${DOMAIN}
+      - HOMEPAGE_VAR_RADICALE_PASSWORD=${RADICALE_PASSWORD}
+    volumes:
+      - /opt/repo/config/homepage:/app/config
+      - /data:/data:ro
+      - /opt/appdata/homepage/calendars:/app/public/calendars
+      - /opt/appdata/homepage/public/clocks:/app/public/clocks
+      - /opt/appdata/homepage/public/images:/app/public/images
+    networks: [ proxy, media ]
+
+  dockge:
+    image: louislam/dockge:1.4.2
+    container_name: dockge
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /opt/appdata/dockge:/app/data
+      - /opt/stacks:/opt/stacks
+    environment:
+      - DOCKGE_STACKS_DIR=/opt/stacks
+    networks: [ proxy ]
+
+  dozzle:
+    image: amir20/dozzle:v8.10.1
+    container_name: dozzle
+    restart: unless-stopped
+    security_opt: [ "no-new-privileges:true" ]
+    environment:
+      - DOZZLE_REMOTE_HOST=tcp://socket-proxy:2375
+      - DOZZLE_NO_ANALYTICS=true
+    networks: [ proxy ]
+
+networks:
+  proxy:
+    external: true
+  media:
+    external: true

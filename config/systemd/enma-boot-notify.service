@@ -1,0 +1,12 @@
+[Unit]
+Description=Notify on boot
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStartPre=/bin/sleep 30
+ExecStart=/usr/local/bin/boot-notify.sh
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,12 @@
+[Unit]
+Description=Bring up all compose stacks
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/bin/bash -c 'for d in /opt/stacks/*/; do docker compose -f "$d/docker-compose.yml" up -d; done'
+
+[Install]
+WantedBy=multi-user.target

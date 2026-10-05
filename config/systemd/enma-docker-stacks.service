@@ -1,0 +1,12 @@
+[Unit]
+Description=Bring up compose stack
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/bin/bash -c 'docker compose -f /opt/repo/compose/enma/docker-compose.yml up -d'
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,7 @@
+[Unit]
+Description=Notify on enma backup failure
+
+[Service]
+Type=oneshot
+EnvironmentFile=/root/.enma-backup-env
+ExecStart=/bin/bash -c 'curl -fsS -H "Authorization: Bearer $NTFY_TOKEN" -d "enma backup FAILED - check journalctl -u enma-backup" http://localhost:8080/jigoku-backups'

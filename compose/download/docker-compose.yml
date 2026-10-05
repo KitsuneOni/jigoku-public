@@ -1,0 +1,70 @@
+services:
+  gluetun:
+    image: qmcgaw/gluetun:v3.39.1
+    container_name: gluetun
+    restart: unless-stopped
+    cap_add: [ NET_ADMIN ]
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    environment:
+      - VPN_SERVICE_PROVIDER=${VPN_PROVIDER}
+      - VPN_TYPE=wireguard
+      - WIREGUARD_PRIVATE_KEY=${VPN_PRIVATE_KEY}
+      - WIREGUARD_ADDRESSES=${VPN_ADDRESSES}
+      - SERVER_COUNTRIES=${VPN_COUNTRIES}
+      - VPN_PORT_FORWARDING=on
+      - VPN_PORT_FORWARDING_PROVIDER=${VPN_PROVIDER}
+      - FIREWALL_OUTBOUND_SUBNETS=${LAN_SUBNET}
+      - TZ=${TZ}
+    volumes:
+      - /opt/appdata/gluetun:/gluetun
+      - /opt/appdata/gluetun/auth:/gluetun/auth
+    ports:
+      # qBittorrent WebUI, published through gluetun's namespace, localhost only
+      - "192.168.1.10:8080:8080"
+    networks: [ download, media, proxy ]
+    healthcheck:
+      test: [ "CMD", "wget", "-qO-", "https://ipinfo.io/ip" ]
+      interval: 60s
+      timeout: 20s
+      retries: 3
+
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:5.0.3
+    container_name: qbittorrent
+    restart: unless-stopped
+    # No network of its own — all traffic through the VPN. Kill switch by design.
+    network_mode: "service:gluetun"
+    depends_on:
+      gluetun:
+        condition: service_healthy
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - WEBUI_PORT=8080
+      - WEBUI_PASSWORD=&11znE1M3Qadb*
+    volumes:
+      - /opt/appdata/qbittorrent:/config
+      - /data/torrents:/data/torrents
+
+  sabnzbd:
+    image: lscr.io/linuxserver/sabnzbd:4.4.1
+    container_name: sabnzbd
+    restart: unless-stopped
+    security_opt: [ "no-new-privileges:true" ]
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - /opt/appdata/sabnzbd:/config
+      - /data/usenet:/data/usenet
+    networks: [ download, media, proxy ]
+networks:
+  download:
+    external: true
+  media:
+    external: true
+  proxy:
+    external: true

@@ -1,0 +1,17 @@
+apiVersion: 1
+
+datasources:
+  - name: PostgreSQL
+    type: postgres
+    access: proxy
+    url: db:5432
+    # Read-only role, create it before first start, see README.md.
+    user: grafana_ro
+    isDefault: false
+    jsonData:
+      database: wger
+      sslmode: disable
+      postgresVersion: 1500  # 1500 = 15.x
+      timescaledb: false
+    secureJsonData:
+      password: grafana_ro

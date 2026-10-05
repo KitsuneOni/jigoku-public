@@ -1,0 +1,68 @@
+// jigoku tailnet ACL policy — source of truth lives in git.
+// Paste into: Tailscale admin console -> Access controls
+// The "tests" block runs on save; a policy that breaks your own access
+// is rejected before it applies.
+{
+	"tagOwners": {
+		"tag:server":  ["autogroup:admin"],
+		"tag:trusted": ["autogroup:admin"],
+		"tag:guest":   ["autogroup:admin"],
+	},
+
+	"acls": [
+		// Servers talk to each other freely (backups, monitoring, DNS).
+		{
+			"action": "accept",
+			"src":    ["tag:server"],
+			"dst":    ["tag:server:*"],
+		},
+
+		// Your own devices: full access.
+		{
+			"action": "accept",
+			"src":    ["autogroup:admin", "tag:trusted"],
+			"dst":    ["*:*"],
+		},
+
+		// Guests: Jellyfin and Jellyseerr only, over HTTPS via Caddy.
+		// Note Caddy serves every vhost on 443, so the Caddyfile also
+		// filters by source IP — this ACL is the network-layer half.
+		{
+			"action": "accept",
+			"src":    ["tag:guest"],
+			"dst":    ["tag:server:443"],
+		},
+
+		// Guests reaching Jellyfin directly on the LAN port (fallback).
+		{
+			"action": "accept",
+			"src":    ["tag:guest"],
+			"dst":    ["tag:server:8096"],
+		},
+	],
+
+	"ssh": [
+		{
+			"action": "accept",
+			"src":    ["autogroup:admin"],
+			"dst":    ["tag:server"],
+			"users":  ["oni", "root"],
+		},
+	],
+
+	"tests": [
+		{
+			"src":    "tag:guest",
+			"accept": ["tag:server:443", "tag:server:8096"],
+			"deny":   ["tag:server:22", "tag:server:8989", "tag:server:7878", "tag:server:9696"],
+		},
+		{
+			"src":    "tag:trusted",
+			"accept": ["tag:server:22", "tag:server:8989", "tag:server:443"],
+		},
+		{
+			"src":    "tag:server",
+			"accept": ["tag:server:22"],
+		},
+	],
+}

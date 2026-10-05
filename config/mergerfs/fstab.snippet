@@ -1,0 +1,15 @@
+# /etc/fstab — jigoku storage
+# Replace UUIDs with output of: sudo blkid /dev/sda1 /dev/sdb1
+
+UUID=REPLACE-DISK1-UUID  /mnt/disk1  ext4  defaults,noatime  0 2
+UUID=REPLACE-DISK2-UUID  /mnt/disk2  ext4  defaults,noatime  0 2
+
+# mergerfs pool. The /mnt/disk* glob picks up new drives automatically —
+# adding a third disk is one more line above and `sudo mount -a`.
+#
+# category.create=mfs  -> new files go to the disk with most free space
+# minfreespace=50G     -> stop writing to a disk once it's nearly full
+# use_ino              -> consistent inode numbers, required for hardlinks
+# x-systemd.requires   -> don't mount the pool before the disks are ready
+
+/mnt/disk*  /data  fuse.mergerfs  defaults,nonempty,allow_other,use_ino,cache.files=partial,dropcacheonclose=true,category.create=mfs,minfreespace=50G,fsname=mergerfs,x-systemd.requires=/mnt/disk1  0 0

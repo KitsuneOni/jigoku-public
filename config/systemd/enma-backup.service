@@ -1,0 +1,11 @@
+[Unit]
+Description=restic backup of enma configs
+OnFailure=enma-backup-failed.service
+
+[Service]
+Type=oneshot
+EnvironmentFile=/root/.enma-backup-env
+Environment=HOME=/root
+Environment=RESTIC_CACHE_DIR=/root/.cache/restic
+TimeoutStartSec=1800
+ExecStart=/usr/local/bin/enma-backup.sh

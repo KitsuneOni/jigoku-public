@@ -1,0 +1,160 @@
+{
+	email admin@{$DOMAIN}
+	acme_dns cloudflare {$CLOUDFLARE_API_TOKEN}
+}
+
+# Guests (Tailscale CGNAT range, tag:guest enforced at the ACL layer too)
+# get Jellyfin and Jellyseerr only. Everything else 403s even if they guess
+# the hostname — network ACLs alone can't distinguish vhosts on :443.
+(guest_block) {
+	@not_guest not remote_ip {$TS_GUEST_RANGE}
+	handle @not_guest {
+		reverse_proxy {args[0]}
+	}
+	handle {
+		respond "Forbidden" 403
+	}
+}
+
+# LAN or Tailscale, no login. For clients that can't follow an auth redirect.
+(internal_only) {
+	@allowed remote_ip {$LAN_SUBNET} 100.64.0.0/10
+	handle @allowed {
+		reverse_proxy {args[0]}
+	}
+	handle {
+		respond "Forbidden" 403
+	}
+}
+
+# LAN or Tailscale AND authenticated via Authelia. Admin services only.
+(protected) {
+	@allowed remote_ip {$LAN_SUBNET} 100.64.0.0/10
+	handle @allowed {
+		forward_auth authelia:9091 {
+			uri /api/authz/forward-auth
+			copy_headers Remote-User Remote-Groups Remote-Name Remote-Email
+		}
+		reverse_proxy {args[0]}
+	}
+	handle {
+		respond "Forbidden" 403
+	}
+}
+
+# --- Household facing: no Authelia, clients can't do the redirect ---
+
+jellyfin.{$DOMAIN} {
+	reverse_proxy jellyfin:8096
+}
+
+requests.{$DOMAIN} {
+	reverse_proxy jellyseerr:5055
+}
+
+books.{$DOMAIN} {
+	import internal_only audiobookshelf:80
+}
+
+ntfy.{$DOMAIN} {
+	reverse_proxy 192.168.1.11:8080
+}
+calendar.{$DOMAIN} {
+	import internal_only radicale:5232
+}
+# --- Authelia itself: must not sit behind forward_auth ---
+
+auth.{$DOMAIN} {
+	import internal_only authelia:9091
+}
+
+# --- Admin: login + TOTP required ---
+
+{$DOMAIN} {
+	handle /food* {
+		redir https://food.{$DOMAIN} permanent
+	}
+	handle {
+		import protected homepage:3000
+	}
+}
+food.{$DOMAIN} {
+	@allowed remote_ip {$LAN_SUBNET} 100.64.0.0/10
+	handle @allowed {
+		reverse_proxy wger-nginx-1:80 {
+			header_up X-Forwarded-Proto https
+		}
+	}
+	handle {
+		respond "Forbidden" 403
+	}
+}
+home.{$DOMAIN} {
+	import protected homepage:3000
+}
+
+radarr.{$DOMAIN} {
+	import protected radarr:7878
+}
+
+sonarr.{$DOMAIN} {
+	import protected sonarr:8989
+}
+
+prowlarr.{$DOMAIN} {
+	import protected prowlarr:9696
+}
+
+bazarr.{$DOMAIN} {
+	import protected bazarr:6767
+}
+
+sab.{$DOMAIN} {
+	import protected sabnzbd:8080
+}
+
+qbit.{$DOMAIN} {
+	import protected gluetun:8080
+}
+
+dockge.{$DOMAIN} {
+	import protected dockge:5001
+}
+
+logs.{$DOMAIN} {
+	import protected dozzle:8080
+}
+
+scrutiny.{$DOMAIN} {
+	import protected scrutiny:8080
+}
+
+grafana.{$DOMAIN} {
+	import protected grafana:3000
+}
+
+prometheus.{$DOMAIN} {
+	import protected prometheus:9090
+}
+
+# --- enma services, proxied from jigoku ---
+
+adguard.{$DOMAIN} {
+	import protected 192.168.1.11:80
+}
+
+uptime.{$DOMAIN} {
+	import protected 192.168.1.11:3001
+}
+
+beszel.{$DOMAIN} {
+	import protected 192.168.1.11:8090
+}
+
+backrest.{$DOMAIN} {
+	import protected 192.168.1.11:9898
+}
+
+tdarr.{$DOMAIN} {
+	import protected tdarr:8265
+}

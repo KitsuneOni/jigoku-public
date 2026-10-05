@@ -1,0 +1,34 @@
+title: jigoku
+headerStyle: boxed
+background:
+  image: /images/background.gif
+  blur: sm
+  brightness: 60
+cardBlur: sm
+theme: dark
+color: slate
+layout:
+  Clocks:
+    style: row
+    columns: 1
+  Calendar:
+    style: row
+    columns: 2
+  Media:
+    style: row
+    columns: 3
+  Automation:
+    style: row
+    columns: 4
+    initiallyCollapsed: true
+  Downloads:
+    style: row
+    columns: 2
+  Infrastructure:
+    style: row
+    columns: 4
+    initiallyCollapsed: true
+  enma:
+    style: row
+    columns: 4
+    initiallyCollapsed: true

@@ -1,0 +1,20 @@
+/* Service and widget cards: black at 80%, white text */
+.services-list .service-card,
+.bookmark-list .bookmark-card,
+#information-widgets .widget,
+.service-card,
+.bookmark-card {
+  background-color: rgba(0, 0, 0, 0.8) !important;
+  color: #ffffff !important;
+}
+
+.service-card *,
+.bookmark-card * {
+  color: #ffffff !important;
+}
+
+/* Group headings */
+h2.services-group-name,
+.services-group-name {
+  color: #ffffff !important;
+}

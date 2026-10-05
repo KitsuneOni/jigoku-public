@@ -1,0 +1,25 @@
+# Radicale — CalDAV server for jigoku.
+# CalDAV clients (DAVx5, phone calendar apps) cannot follow an auth
+# redirect, so Radicale keeps its own htpasswd for the sync endpoint.
+# The Caddy vhost is therefore internal_only, not protected.
+
+[server]
+hosts = 0.0.0.0:5232
+max_connections = 20
+max_content_length = 100000000
+timeout = 30
+
+[auth]
+type = htpasswd
+htpasswd_filename = /config/users
+htpasswd_encryption = bcrypt
+
+[storage]
+type = multifilesystem
+filesystem_folder = /data/collections
+
+[rights]
+type = owner_only
+
+[logging]
+level = info

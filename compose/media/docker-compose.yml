@@ -1,0 +1,48 @@
+services:
+  jellyfin:
+    image: jellyfin/jellyfin:10.11.11
+    container_name: jellyfin
+    restart: unless-stopped
+    ports:
+      - "192.168.1.10:8096:8096"
+      - "100.118.227.102:8096:8096"
+    user: "1000:1000"
+    security_opt: [ "no-new-privileges:true" ]
+    environment:
+      - TZ=${TZ}
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,video,utility
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [ gpu ]
+    volumes:
+      - /opt/appdata/jellyfin/config:/config
+      - /opt/appdata/jellyfin/cache:/cache
+      - /data/media:/data/media:ro
+    tmpfs:
+      - /transcode:size=2G
+    networks: [ media, proxy ]
+
+  audiobookshelf:
+    image: ghcr.io/advplyr/audiobookshelf:2.17.4
+    container_name: audiobookshelf
+    restart: unless-stopped
+    user: "1000:1000"
+    security_opt: [ "no-new-privileges:true" ]
+    environment:
+      - TZ=${TZ}
+    volumes:
+      - /opt/appdata/audiobookshelf/config:/config
+      - /opt/appdata/audiobookshelf/metadata:/metadata
+      - /data/media/audiobooks:/audiobooks
+    networks: [ media, proxy ]
+
+networks:
+  media:
+    external: true
+  proxy:
+    external: true

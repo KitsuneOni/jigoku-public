@@ -1,0 +1,71 @@
+services:
+  adguard:
+    image: adguard/adguardhome:v0.107.55
+    container_name: adguard
+    restart: unless-stopped
+    network_mode: host
+    volumes:
+      - /opt/appdata/adguard/work:/opt/adguardhome/work
+      - /opt/appdata/adguard/conf:/opt/adguardhome/conf
+
+  uptime-kuma:
+    image: louislam/uptime-kuma:1.23.16
+    container_name: uptime-kuma
+    restart: unless-stopped
+    volumes:
+      - /opt/appdata/uptime-kuma:/app/data
+    ports:
+      - "3001:3001"
+
+  ntfy:
+    image: binwiederhier/ntfy:v2.11.0
+    container_name: ntfy
+    restart: unless-stopped
+    command: serve
+    environment:
+      - NTFY_BASE_URL=https://ntfy.${DOMAIN}
+      - NTFY_BEHIND_PROXY=true
+      - NTFY_AUTH_FILE=/var/lib/ntfy/user.db
+      - NTFY_AUTH_DEFAULT_ACCESS=deny-all
+      - NTFY_ENABLE_LOGIN=true
+    volumes:
+      - /opt/appdata/ntfy/cache:/var/cache/ntfy
+      - /opt/appdata/ntfy/lib:/var/lib/ntfy
+    ports:
+      - "8080:80"
+
+  beszel-hub:
+    image: henrygd/beszel:0.9.1
+    container_name: beszel-hub
+    restart: unless-stopped
+    volumes:
+      - /opt/appdata/beszel:/beszel_data
+    ports:
+      - "8090:8090"
+
+  backrest:
+    image: garethgeorge/backrest:v1.6.2
+    container_name: backrest
+    restart: unless-stopped
+    environment:
+      - BACKREST_PORT=9898
+      - BACKREST_DATA=/data
+      - TZ=${TZ}
+    volumes:
+      - /opt/appdata/backrest/data:/data
+      - /opt/appdata/backrest/config:/config
+      - /opt/appdata/backrest/cache:/cache
+      - /srv/restic:/repos
+    ports:
+      - "9898:9898"
+
+  beszel-agent:
+    image: henrygd/beszel-agent:0.9.1
+    container_name: beszel-agent
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      - PORT=45876
+      - KEY=${BESZEL_KEY}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro

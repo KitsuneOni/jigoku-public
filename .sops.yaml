@@ -1,0 +1,6 @@
+# SOPS rules: everything under secrets/ is encrypted with the age key.
+# Generate the key once:  age-keygen -o ~/.config/sops/age/keys.txt
+# Put the PUBLIC key below. The private key never leaves jigoku/enma.
+creation_rules:
+  - path_regex: secrets/.*\.enc\.yaml$
+    age: "age1replace-with-your-age-public-key"

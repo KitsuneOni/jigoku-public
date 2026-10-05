@@ -1,0 +1,18 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "docker-compose": { "enabled": true },
+  "timezone": "Pacific/Auckland",
+  "schedule": ["after 9pm on saturday"],
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["minor", "patch"],
+      "automerge": false
+    },
+    {
+      "matchPackageNames": ["jellyfin/jellyfin"],
+      "labels": ["needs-tv-resideload"],
+      "description": "Sideloaded Tizen client is version-pinned — re-sideload after upgrading (doc 16/17)"
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+# Secrets — never commit decrypted material
+.env
+*.env
+!.env.example
+secrets/*.yaml
+!secrets/*.enc.yaml
+*.key
+*.pem
+age.key
+authkey*
+wg*.conf
+*.ovpn
+
+# Runtime state
+appdata/
+data/
+*.db
+*.db-shm
+*.db-wal
+*.log
+
+# OS noise
+.DS_Store
+Thumbs.db
+*.swp
+config/recyclarr/repositories/
+config/recyclarr/cache/
+config/recyclarr/repositories/
+config/recyclarr/cache/
+config/recyclarr/repositories/
+config/recyclarr/cache/
+config/authelia/users_database.yml
+config/caddy/Caddyfile.pre-*

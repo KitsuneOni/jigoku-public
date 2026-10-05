@@ -1,0 +1,112 @@
+# Example override file. Copy as docker-compose.override.yml and edit as needed
+
+# Please note that when defining lists here, they will be merged with the
+# lists in the base file. If you want to completely override a list, instead
+# you need to use the special syntax "!override" and "!reset".
+# For more details: https://docs.docker.com/reference/compose-file/merge/
+services:
+
+  web:
+    env_file:
+      - ./config/wger-local.env # Only add the variables that you have changed
+
+  celery_worker:
+    env_file:
+      - ./config/wger-local.env
+
+  celery_beat:
+    env_file:
+      - ./config/wger-local.env
+
+  #
+  # Example configuration to add Anubis as a debugging proxy in front of the web
+  # service. If you set up wger on a public server, and get flooded with ai crawler
+  # requests, you sadly will have to deal with them.
+  #
+  # Generate the ED25519 private key with "openssl rand -hex 32"
+  anubis:
+    image: ghcr.io/techarohq/anubis:latest
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: 3
+    pull_policy: always
+    environment:
+      BIND: ":3000"
+      METRICS_BIND: ":9090"
+      TARGET: http://web:8000
+      POLICY_FNAME: "/data/cfg/anubis-rules.yml"
+      WEBMASTER_EMAIL: "hello@wger.de"
+      USE_REMOTE_ADDRESS: "true"
+
+       # generate with e.g. "openssl rand -hex 32"
+      ED25519_PRIVATE_KEY_HEX: "dba7c07331693b7beaeae102765568dd3c35cc1b6b3b23adaeeb5ecee406cc71"
+    expose:
+      - 3000
+      - 9090
+    healthcheck:
+      test: [ "CMD", "anubis", "--healthcheck" ]
+      interval: 5s
+      timeout: 30s
+      retries: 5
+      start_period: 500ms
+    volumes:
+      - "./config/anubis-rules.yml:/data/cfg/anubis-rules.yml:ro"
+
+#
+# Example configuration using caddy instead of nginx. Since we don't want to
+# change the main compose file as it would break existing deployments, the nginx
+# service needs to stay there. Here we simply remove any exposed ports
+
+#  caddy:
+#    image: docker.io/caddy:latest
+#    logging:
+#        driver: json-file
+#        options:
+#          max-size: 10m
+#          max-file: 3
+#    depends_on:
+#      - web
+#    ports:
+#      - "2019:2019"
+#      - "80:80"
+#      - "443:443"
+#      - "443:443/udp"
+#    volumes:
+#      - ./config/Caddyfile:/etc/caddy/Caddyfile
+#      - caddy-data:/data
+#      - caddy-logs:/var/www/logs
+#      - caddy-config:/config
+#      - static:/wger/static:ro
+#      - media:/wger/media:ro
+#
+#  nginx:
+#    ports: !reset []
+
+  celery_flower:
+    image: docker.io/wger/server:latest
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: 3
+    command: /start-flower
+    env_file:
+      - ./config/prod.env
+    ports:
+      - "5555:5555"
+    healthcheck:
+      test: wget --no-verbose --tries=1 http://localhost:5555/healthcheck
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    depends_on:
+      celery_worker:
+        condition: service_healthy
+
+#volumes:
+#  caddy_data:
+#  caddy-data:
+#  caddy-config:
+#  caddy-logs:

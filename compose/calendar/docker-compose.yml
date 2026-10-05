@@ -1,0 +1,27 @@
+services:
+  radicale:
+    image: tomsquest/docker-radicale:3.5.1.0
+    container_name: radicale
+    restart: unless-stopped
+    init: true
+    read_only: true
+    security_opt: [ "no-new-privileges:true" ]
+    cap_drop: [ ALL ]
+    cap_add: [ SETUID, SETGID, CHOWN, KILL ]
+    environment:
+      - TZ=${TZ}
+    volumes:
+      - /opt/appdata/radicale/data:/data
+      - /opt/repo/config/radicale/config:/config/config:ro
+      - /opt/appdata/radicale/users.htpasswd:/config/users:ro
+    tmpfs:
+      - /tmp
+    networks: [ media, proxy ]
+    ports:
+      - "127.0.0.1:5232:5232"
+
+networks:
+  media:
+    external: true
+  proxy:
+    external: true

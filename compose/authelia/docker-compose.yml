@@ -1,0 +1,25 @@
+services:
+  authelia:
+    image: authelia/authelia:4.38.19
+    container_name: authelia
+    restart: unless-stopped
+    security_opt: [ "no-new-privileges:true" ]
+    environment:
+      - TZ=${TZ}
+      - AUTHELIA_JWT_SECRET_FILE=/secrets/jwt
+      - AUTHELIA_SESSION_SECRET_FILE=/secrets/session
+      - AUTHELIA_STORAGE_ENCRYPTION_KEY_FILE=/secrets/storage
+    volumes:
+      - /opt/repo/config/authelia:/config:ro
+      - /opt/appdata/authelia:/data
+      - /opt/appdata/authelia/secrets:/secrets:ro
+    networks: [ proxy ]
+    healthcheck:
+      test: [ "CMD", "wget", "-qO-", "http://localhost:9091/api/health" ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+networks:
+  proxy:
+    external: true

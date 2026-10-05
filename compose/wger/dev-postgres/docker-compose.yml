@@ -1,0 +1,65 @@
+name: wger-dev-postgres
+
+services:
+  web:
+    build:
+      pull: true
+      context: ${WGER_CODEPATH:?set the absolute path to the wger backend code in the .env file or env variable}
+      dockerfile: ./extras/docker/development/Dockerfile
+    develop:
+      watch:
+        - action: sync
+          path: ${WGER_CODEPATH}
+          target: /home/wger/src
+        - action: rebuild
+          path: ${WGER_CODEPATH}/pyproject.toml
+        - action: rebuild
+          path: ${WGER_CODEPATH}/package.json
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - ../config/prod.env
+      - ../config/dev.env
+    ports:
+      - "${WGER_HOST_PORT:-8000}:8000"
+
+  # No need to persist the data in dev
+#  cache:
+#    volumes: !override
+#      - ../config/redis.conf:/usr/local/etc/redis/redis.conf
+
+  db:
+    shm_size: 256mb
+    # Add to log all sql statements
+    # "-c", "log_statement=all", "-c", "log_min_error_statement=DEBUG1"
+    # command: [ "postgres", "-c", "wal_level=logical" ]
+    volumes: !override
+      - postgres-dev-data:/var/lib/postgresql/data/
+      - ./initdb:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "${POSTGRES_HOST_PORT:-5432}:5432"
+
+# To run the backend "locally" on the host while keeping PowerSync and postgres containerised:
+# Only linux needs to set the extra hosts, macOS/Windows work out of the box
+  powersync:
+#    extra_hosts:
+#      - "host.docker.internal:host-gateway"
+#    environment:
+#      PS_JWKS_URL: "http://host.docker.internal:8000/api/v2/powersync-keys"
+    env_file:
+      - ../config/dev.env
+    ports:
+      - "${POWERSYNC_HOST_PORT:-8080}:8080"
+
+volumes:
+  postgres-dev-data:
+
+networks:
+  default:
+    name: wger-dev-network
+
+include:
+  - path: ../services/postgres.yaml
+  - path: ../services/powersync.yaml
+  - path: ../services/redis.yaml

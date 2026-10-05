@@ -1,0 +1,9 @@
+[Unit]
+Description=Push calendar reminders to ntfy
+After=network-online.target
+
+[Service]
+Type=oneshot
+EnvironmentFile=/root/.calendar-env
+Environment=TZ=Pacific/Auckland
+ExecStart=/usr/local/bin/calendar-reminders.py

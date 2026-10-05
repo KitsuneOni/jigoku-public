@@ -1,0 +1,7 @@
+[Unit]
+Description=Notify on backup failure
+
+[Service]
+Type=oneshot
+EnvironmentFile=/root/.backup-env
+ExecStart=/bin/bash -c 'curl -fsS -H "Authorization: Bearer $NTFY_TOKEN" -d "jigoku backup FAILED - check journalctl -u jigoku-backup" http://192.168.1.11:8080/jigoku-backups'
